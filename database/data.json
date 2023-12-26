@@ -1,1 +1,12 @@
-{"name": "RyuX", "race": "Elf", "userSide": "DragonSlayer", "money": 1000, "weaponName": "DragonArt", "playerHP": 100, "dmgBonus": 35, "clan": ""}
+{
+    "name": "RyuX",
+    "current_title": "The Creator",
+    "race": "Dragon",
+    "userSide": "DragonSlayer",
+    "kill": 0,
+    "money": 1190,
+    "weaponName": "DragonArt",
+    "playerHP": 88,
+    "dmgBonus": 35, 
+    "clan": ""
+}
