@@ -1,11 +1,11 @@
 #This script inspired By: Naruto, Fairy Tail, One Piece
 #Owner: RyuX
-#Support: Novi
 
 import time
 import random
 import os
 import json
+import string
 
 name = ''
 race = 'unknown'
@@ -25,6 +25,9 @@ clan = ""
 dungeon = False
 kill = 0
 title = ""
+inCity = False
+inSea = False
+Admin = False
 
 #side enemy
 villainEnemy = ["Knight", "King", "Bounty Hunter", "DragonSlayer", "DevilKing"]
@@ -58,6 +61,12 @@ divineAttack = [
 
 
 #function
+def sendMessage(text):
+    for char in text:
+        print(char, end='', flush=True)
+        time.sleep(0.05)
+    print()  
+
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
     return ("   ")
@@ -65,6 +74,17 @@ def clear():
 def SelectTable(init):
     if init == "1":
         foundEnemy()
+
+def LoadAdmins():
+    global name, Admin
+    with open('database/admin.json', 'r') as f:
+        admin = json.load(f)
+        if name in admin['admins']:
+            print('You login as admin')
+            Admin = True
+            time.sleep(1)
+
+    
 
 def createAccount():
     global dmgBonus, userSide
@@ -82,7 +102,7 @@ def createAccount():
     if race == 'Demon':
         dmgBonus += 5
     time.sleep(1)
-    print(f'Your role is {side}')
+    sendMessage(f'Your role is {side}')
     data = {
         "name": name,
         "current_title": '',
@@ -101,7 +121,7 @@ def createAccount():
     loadData()
 
 def loadData():
-    global name, userSide, money, weaponName, playerHP, enemyHP, dmgBonus, clan, race, kill, title
+    global name, userSide, money, weaponName, playerHP, enemyHP, dmgBonus, clan, race, kill, title, Admin
     with open(database, 'r') as f:
         data = json.load(f)
         if data == {}:
@@ -117,8 +137,9 @@ def loadData():
             playerHP = data["playerHP"]
             dmgBonus = data["dmgBonus"]
             clan = data["clan"]
-    print("Game loaded.")
-    if name == 'RyuX':
+    sendMessage("Game loaded.")
+    LoadAdmins()
+    if Admin == True:
         title = 'Creator Of World' #Title khusus owner game
         race = 'GOD' #Race khusus owner
     runGame()
@@ -161,11 +182,12 @@ def choose_title():
     chosen_title_id = None
     while chosen_title_id is None:
         try:
-            chosen_title_id = int(input("Input Title ID: "))
+            chosen_title_id = int(input("Input Title ID (Type Exit to exit): "))
             if chosen_title_id not in [int(title['id']) for title in existing_titles]:
                 chosen_title_id = None
         except ValueError:
             print("ID harus berupa angka.")
+            runGame()
     
     chosen_title = get_title_by_id(existing_titles, chosen_title_id)
     return chosen_title
@@ -196,33 +218,33 @@ def showDamage(dmg):
 def evoleRace(races):
     global race, dmgBonus
     if races == 'Demon':
-        print('What??')
+        sendMessage('What??')
         time.sleep(1)
-        print('Something happened to your body...')
-        print('You evolve to higher level of demon. your race now is High Demonic')
+        sendMessage('Something happened to your body...')
+        sendMessage('You evolve to higher level of demon. your race now is High Demonic')
         race = 'High Demonic'
         GiveTitle('Demon King', 'Evolve Demon To High Demonic')
     elif races == 'Human':
-        print('What??')
+        sendMessage('What??')
         time.sleep(1)
-        print('Your Body Feel Stranger Power')
+        sendMessage('Your Body Feel Stranger Power')
         time.sleep(1)
         race = 'Super Human'
-        print('You evolve to super human')
+        sendMessage('You evolve to super human')
         dmgBonus += random.randint(30, 45)
         GiveTitle('Human Weapon', 'Evolve Human Into Super Human')
     elif race == 'Fishman':
-        print('What??')
+        sendMessage('What??')
         time.sleep(1)
-        print('Something happened to your body...')
+        sendMessage('Something happened to your body...')
         time.sleep(1)
-        print('You evolve to Sea Beast')
+        sendMessage('You evolve to Sea Beast')
         race = 'Sea Beast'
         GiveTitle('Sea King', 'Evolve Fishman Into Sea Beast')
     time.sleep(1)
     runGame()
 
-def foundEnemy():
+def foundEnemy(where):
     global enemyHP
     global playerHP
     if enemyHP < 0:
@@ -237,12 +259,12 @@ def foundEnemy():
     print("1.Attack\t\t2.Run")
     choice = input("")
     if choice == "1":
-        attackEnemy(1)
+        attackEnemy(1, where)
     elif choice == "2":
-        attackEnemy(2)
+        attackEnemy(2, where)
 
 
-def attackEnemy(choised):
+def attackEnemy(choised, location = ''):
     clear()
 
     global playerHP
@@ -253,7 +275,7 @@ def attackEnemy(choised):
     global enemyDamage
     global ninjaJutsu
     global weaponName
-    global dragonSlayerATTACK, race, divineAttack, kill
+    global dragonSlayerATTACK, race, divineAttack, kill, inCity
     playerDamage = random.randint(1, 25)
     enemyDamage = random.randint(1, 25)
     if choised == 1:
@@ -261,22 +283,22 @@ def attackEnemy(choised):
         if userSide == "Ninja":
             if weaponName == "Jutsu":
                 jutsu = random.choice(ninjaJutsu)
-                print("You attack enemy use", jutsu, weaponName)
+                print(f"You attack enemy use {jutsu},{weaponName}")
 
         elif userSide == "DragonSlayer":
             dragonArt = random.choice(dragonSlayerATTACK)
-            print("You Attack Enemy Use", dragonArt)
+            print(f"You Attack Enemy Use {dragonArt}")
 
         elif race == "Angel":
             divine = random.choice(divineAttack)
-            print('You attack your enemy use', divine)
+            print(f'You attack your enemy use {divine}')
 
         else:
-            print("You attack enemy use", weaponName)
+            print(f"You attack enemy use {weaponName}")
 
         time.sleep(1)
         totalDamage = playerDamage + dmgBonus
-        print("You hit the enemy")
+        sendMessage("You hit the enemy")
         time.sleep(1)
         showDamage(totalDamage)
         enemyHP -= totalDamage
@@ -285,12 +307,12 @@ def attackEnemy(choised):
             print("you win")
             time.sleep(1)
             print("Dracon +35")
-            if kill == 500:
-                GiveTitle('The Beast', 'Kill 500 Enemy')
             money += 35
             kill += 1
+            if kill == 500:
+                GiveTitle('The Beast', 'Kill 500 Enemy')
             if race == 'Elf':
-                print('Elf Race bonus, prize increase more')
+                sendMessage('Elf Race bonus, prize increase more')
                 money += random.randint(5, 25) #buff 2 times prize
             drop = random.randint(1, 100)
             if race == 'Elf':
@@ -310,21 +332,21 @@ def attackEnemy(choised):
 
             if drop == 10:
                 if userSide == 'DragonSlayer':
-                    print('Your Body Slowly show a scale...')
+                    sendMessage('Your Body Slowly show a scale...')
                     time.sleep(1)
-                    print(f'You become a dragon in {race} body')
+                    sendMessage(f'You become a dragon in {race} body')
                     if race == 'Sea Beast':
-                        print('What??? You turn into another creature???')
+                        sendMessage('What??? You turn into another creature???')
                         time.sleep(1)
-                        print('You Evolve to Leviathan beside Dragon!!!')
+                        sendMessage('You Evolve to Leviathan beside Dragon!!!')
                         race = 'Leviathan'
                         GiveTitle('Sea God', 'Unlock Leviathan Race')
                         time.sleep(1)
                         runGame()
                     if race == 'Super Human': #An super human evolve to dragon will turn player into angel
-                        print('What??? You turn into another creature???')
+                        sendMessage('What??? You turn into another creature???')
                         time.sleep(1)
-                        print('You Evolve to Angel beside Dragon!!!')
+                        sendMessage('You Evolve to Angel beside Dragon!!!')
                         race = 'Angel'
                         weaponName = 'Divine Energy'
                         GiveTitle('Sky God', 'Unlock Angel Race')
@@ -333,6 +355,15 @@ def attackEnemy(choised):
                     race = 'Dragon' #Rare race
                     GiveTitle('Sky King', 'Unlock Dragon Race')
             time.sleep(2)
+            if inCity == True:
+                if userSide == 'DragonSlayer':
+                    sendMessage('Your attack cause some building destoryed and people notice you as dragon slayer')
+                    time.sleep(1)
+                    sendMessage('The Citizen kick you out from the city')
+                    inCity = False
+                    time.sleep(1)
+                    Explore()
+                ExploreCity(location)
             Explore()
 
         time.sleep(2)
@@ -342,38 +373,38 @@ def attackEnemy(choised):
         if race == 'Dragon':
             enemyDamage -= random.randint(10, 30) #buff damage
             enemyHP -= random.randint(10, 15)
-            print('Your enemy has hit by Dragon Full Counter that make them feel pain in theur own attack')
+            sendMessage('Your enemy has hit by Dragon Full Counter that make them feel pain in theur own attack')
             time.sleep(1)
         playerHP -= enemyDamage
         showDamage(enemyDamage)
         if race == 'Demon':
             playerHP += random.randint(5, 25) #buff life steal
-            print('Demon Race Buff your hp increase')
+            sendMessage('Demon Race Buff your hp increase')
             time.sleep(1)
         if race == 'High Demon': #buff HighDemonic
             playerHP += random.randint(5, 25)
             enemyHP -= random.randint(10,60)
-            print('High Demon use Demonic Lifesteel')
+            sendMessage('High Demon use Demonic Lifesteel')
             time.sleep(1)
         if playerHP <= 0:
             print("You Lose")
             time.sleep(3)
             exit()
-        foundEnemy()
+        foundEnemy(location)
 
         if playerHP <= 0:
             if race == 'Angel':
                 playerHP = 100
-                print('Angel Race Buff: You came back life')
+                sendMessage('Angel Race Buff: You came back life')
                 time.sleep(1)
-                foundEnemy()
+                foundEnemy(location)
             print("you lose")
             time.sleep(1)
             print("Dracon -20")
             money -= 20
             time.sleep(1)
             exit()
-        foundEnemy()
+        foundEnemy(location)
     if choised == 2:
         print("You run from enemy")
         time.sleep(2)
@@ -383,20 +414,13 @@ def attackEnemy(choised):
         Explore()
 
 
-def showShopMenu():
+def showShopMenu(shop_name = ''):
     clear()
-
-    if userSide == "Knight":
-        print("WELCOME TO ISEKAI STORE")
-    elif userSide == "Villain":
-        print("WELCOME TO BLACK MARKET")
-    elif userSide == "Ninja":
-        print("WELCOME TO NINJA SHOP")
-    elif userSide == "DragonSlayer":
-        print("No shop accepts you")
+    if userSide == "DragonSlayer":
+        sendMessage("No shop accepts you")
         time.sleep(3)
         runGame()
-
+    sendMessage(f'Welcome T0 {shop_name} Shop')
     if userSide == "Ninja":
         print("1.Shuriken(25$)\n2.Kunai(15$)\n3.Jutsu(35$)")
         ninjaSelect = input("")
@@ -429,7 +453,7 @@ def buyNinjaWeapon(wp):
     global money
     if wp == 1:
         if money < 25:
-            print("You need 25 Dracon For Buy This Weapon")
+            sendMessage("You need 25 Dracon For Buy This Weapon")
             time.sleep(1)
             runGame()
         else:
@@ -440,7 +464,7 @@ def buyNinjaWeapon(wp):
             runGame()
     if wp == 2:
         if money < 15:
-            print("You need 15 Dracon For Buy This Weapon")
+            sendMessage("You need 15 Dracon For Buy This Weapon")
             time.sleep(1)
             runGame()
         else:
@@ -451,7 +475,7 @@ def buyNinjaWeapon(wp):
             runGame()
     if wp == 3:
         if money < 35:
-            print("You need 35 Dracon For Buy This Weapon")
+            sendMessage("You need 35 Dracon For Buy This Weapon")
             time.sleep(1)
             runGame()
         else:
@@ -469,7 +493,7 @@ def buyWeapon(wp):
     global money
     if wp == 1:
         if money < 50:
-            print("You Need 25 Dracon For buuy This Weapon")
+            sendMessage("You Need 25 Dracon For buuy This Weapon")
             time.sleep(2)
             runGame()
         else:
@@ -480,7 +504,7 @@ def buyWeapon(wp):
             runGame()
     if wp == 2:
         if money < 15:
-            print("You Need 25 Dracon For buuy This Weapon")
+            sendMessage("You Need 25 Dracon For buuy This Weapon")
             time.sleep(2)
             runGame()
         else:
@@ -491,7 +515,7 @@ def buyWeapon(wp):
             runGame()
     if wp == 3:
         if money < 25:
-            print("You Need 25 Dracon For buuy This Weapon")
+            sendMessage("You Need 25 Dracon For buuy This Weapon")
             time.sleep(2)
             runGame()
         else:
@@ -502,7 +526,7 @@ def buyWeapon(wp):
             runGame()
     if wp == 4:
         if money < 100:
-            print("You Need 100 Dracon For Buy This Weapon")
+            sendMessage("You Need 100 Dracon For Buy This Weapon")
             time.sleep(2)
             runGame()
         else:
@@ -517,27 +541,76 @@ def hospitalMenu():
     global money
     global playerHP
     if money < 5:
-        print("tou need 5 Dracon")
+        sendMessage("tou need 5 Dracon")
         time.sleep(2)
         print("")
     else:
         playerHP = 100
-        print("done +100Hp")
+        sendMessage("done +100Hp")
         money -= 5
         time.sleep(2)
         print("")
     runGame()
 
+def GenerateCity():
+    vowels = 'aeiou'
+    consonants = ''.join(set(string.ascii_lowercase) - set(vowels))
+    
+    random.seed()
+    
+    city_name = random.choice(string.ascii_uppercase)
+    
+    for i in range(random.randint(2, 4)):
+        if i % 2 == 0:
+            city_name += random.choice(consonants)
+        else:
+            city_name += random.choice(vowels)
+    
+    return city_name
+
+def ExploreCity(city_name):
+    clear()
+    global money, race, inCity, enemyHP
+    inCity = True
+    print(f"You are at {city_name} city\nWhat would you like to explore?")
+    print('1.Forward\n2.Back\n3.Left\n4.Right\n5.Stop')
+    way = input()
+    if way == '5':
+        inCity = False
+        Explore()
+    else:
+        city_event = ['Concert', 'Kind', 'Robbery']
+        event = random.choice(city_event)
+        if event == 'Concert':
+            sendMessage('You foun a concert and decided to watch')
+            time.sleep(1)
+            money -= 5
+            ExploreCity(city_name)
+        elif event == 'Kind':
+            sendMessage('A kind person give you money')
+            time.sleep(1)
+            money += random.randint(1, 20)
+            if race == 'Elf':
+                money += random.randint(1, 20)
+                sendMessage('Elf Race buff, increse money')
+            time.sleep(1)
+            ExploreCity(city_name)
+        elif event == 'Robbery':
+            sendMessage('You see a store was robbed by someone')
+            enemyHP = 100
+            foundEnemy(city_name)
+
 def Explore():
     global money, race, userSide, enemyHP, dungeon
     clear()
     if dungeon == True:
-        print('Select your way to explore this dungeon')
+        sendMessage('Select your way to explore this dungeon')
     else:
         print('Select Your Way to Explore')
     print('1.Forward\n2.Back\n3.Left\n4.Right\n5.Stop')
     way = input()
     if way == '5':
+        dungeon = False
         runGame()
     if dungeon == True: #Dungeon monsters stronger than normal monsters
         dungeon_monster = ['Goblin', 'Golem', 'Undead', 'Salamander [BOSS]', 'Giant Golem [BOSS]']
@@ -545,46 +618,51 @@ def Explore():
         if enemy.endswith('[BOSS]'):
             dungeon = False
             enemyHP = 1000
-            print(f'You Found The Boss {enemy}')
+            sendMessage(f'You Found The Boss {enemy}')
             time.sleep(1)
-            foundEnemy()
+            foundEnemy('Dungeon')
         else:
-            print(f'You attacked by {enemy}')
+            sendMessage(f'You attacked by {enemy}')
             enemyHP = 250
             time.sleep(1)
-            foundEnemy()
+            foundEnemy('Forest')
     else:
-        list_event = ['Nothing', 'Treasure', 'Enemy', 'Trap', 'Dungeon']
+        list_event = ['Nothing', 'Treasure', 'Enemy', 'Trap', 'Dungeon', 'City']
         event = random.choice(list_event)
         if event == 'Nothing':
-            print('You found nothing in this way')
+            sendMessage('You found nothing in this way')
             time.sleep(1)
             Explore()
         elif event == 'Treasure':
-            print('You Found a treasure')
+            sendMessage('You Found a treasure')
             prize = random.randint(25, 40)
             money += prize
-            print(f'money +{prize}')
+            sendMessage(f'money +{prize}')
             if race == 'Elf':
                 prize = random.randint(25, 40) #Elf race buff
                 money += prize
-                print(f'Elf Race bonus, prize increase more +{prize}')
+                sendMessage(f'Elf Race bonus, prize increase more +{prize}')
             Explore()
         elif event == 'Trap':
-            print('You fall into bandit trap')
+            sendMessage('You fall into bandit trap')
             time.sleep(1)
             if race == 'Demon' or race == 'Dragon' or race == 'High Demonic' or userSide == 'DragonSlayer':
-                print('The bandit scare of you')
-                print('Safe')
+                sendMessage('The bandit scare of you')
+                sendMessage('Safe')
                 time.sleep(1)
                 Explore()
             else:
                 money -= random.randint(20, 50)
-                print('You lose some money')
+                sendMessage('You lose some money')
                 time.sleep(1)
                 Explore()
+        elif event == 'City':
+            cityname = GenerateCity()
+            sendMessage(f'You arrive at city named: {cityname}')
+            time.sleep(1)
+            ExploreCity(cityname)
         elif event == 'Dungeon':
-            print('You found an dungeon and enter it')
+            sendMessage('You found an dungeon and enter it')
             time.sleep(1)
             dungeon = True
             time.sleep(1)
@@ -593,21 +671,21 @@ def Explore():
             enemyHP = 100
             if userSide == "Villain":
                 tekiDa = random.choice(villainEnemy)
-                print("Your Enemy Is:" + tekiDa)
+                sendMessage(f"Your Enemy Is: {tekiDa}")
             if userSide == "Knight":
                 enemyK = random.choice(knightEnemy)
-                print("Your Enemy Is:" + enemyK)
+                sendMessage(f"Your Enemy Is: {enemyK}")
             if userSide == "Ninja":
                 enemyN = random.choice(ninjaEnemy)
-                print("Your Enemy Is", enemyN)
+                sendMessage(f"Your Enemy Is {enemyN}")
             if userSide == "DragonSlayer":
                 Denemy = random.choice(dragonSlayerEnemy)
-                print("You enemy is", Denemy)
+                sendMessage(f"You enemy is {Denemy}")
                 if Denemy.endswith("Dragon"):
-                    print(name + ": This time i will stop you")
+                    sendMessage(name + ": This time i will stop you")
                     enemyHP = 2000
             time.sleep(2)
-            foundEnemy()
+            foundEnemy('Forest')
 
 
 def selectClan(i):
@@ -627,7 +705,7 @@ def selectClan(i):
 #run all script
 clear()
 if userSide == "Ninja":
-    print("Select Your Clan")
+    sendMessage("Select Your Clan")
     print("1.Uciha\n2.Nara\n3.Senju\n4.Uzumaki\n5.Hyuga")
     myClan = input("")
     if myClan == "1":
@@ -649,7 +727,7 @@ def runGame():
     global ninjaEnemy
     global dragonSlayerEnemy
     global weaponName
-    global dmgBonus, race, kill, title, damage
+    global dmgBonus, race, kill, title, damage, money
     clear()
     if userSide == "Ninja":
         print("Hello", clan, name)
@@ -681,5 +759,37 @@ def runGame():
         saveData()
         time.sleep(1)
         exit()
+    elif select.startswith('/'):
+        admin_commands(select)
+
+def admin_commands(command):
+    global money, kill, race, userSide, dmgBonus
+    if Admin == False:
+        runGame()
+    if command.startswith('/m'):
+        value = command.split()
+        if len(value) == 2:
+            money += int(value[1])
+    elif command.startswith('/k'):
+        value = command.split()
+        if len(value) == 2:
+            kill += int(value[1])
+    elif command.startswith('/r'):
+        parts = command.split()
+        if len(parts) == 2:
+            new_race = parts[1]
+            race = new_race
+    elif command.startswith('/s'):
+        parts = command.split()
+        if len(parts) == 2:
+            new_side = parts[1]
+            userSide = new_side
+    elif command.startswith('/b'):
+        parts = command.split()
+        if len(parts) == 2:
+            new_bonus = int(parts[1])
+            dmgBonus += new_bonus
+
+    runGame()   
 
 loadData()
