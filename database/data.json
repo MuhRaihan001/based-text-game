@@ -1,13 +1,13 @@
 {
     "name": "TsumuX",
     "current_title": "",
-    "race": "Elf",
-    "userSide": "Villain",
+    "race": "Demon",
+    "userSide": "Ronin",
     "kill": 0,
     "money": 1000,
-    "weaponName": "Knife",
+    "weaponName": "Tanto",
     "playerHP": 100,
-    "dmgBonus": 0,
+    "dmgBonus": 35,
     "clan": "",
     "dragonKill": 0
 }
